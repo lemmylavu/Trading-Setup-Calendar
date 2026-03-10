@@ -280,9 +280,11 @@ body {
 
   /* Calendar */
   .cal-wrap { padding: 0.5rem 0.35rem 1rem; }
-  .cal-headers { gap: 2px; margin-bottom: 2px; }
+  .cal-headers { gap: 2px; margin-bottom: 2px; grid-template-columns: 0 repeat(5, 1fr) 0; }
   .cal-header-cell { font-size: 0.55rem; padding: 0.25rem 0; letter-spacing: 0; }
-  .cal-grid { gap: 2px; }
+  .cal-header-cell:first-child, .cal-header-cell:last-child { display: none; }
+  .cal-grid { gap: 2px; grid-template-columns: 0 repeat(5, 1fr) 0; }
+  .day-cell.weekend { display: none; }
 
   /* Cells — taller so chips are readable */
   .day-cell { min-height: 90px; padding: 5px 4px; border-radius: 6px; }
