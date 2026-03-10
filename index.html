@@ -282,7 +282,6 @@ body {
   .cal-wrap { padding: 0.5rem 0.35rem 1rem; }
   .cal-headers { gap: 2px; margin-bottom: 2px; grid-template-columns: repeat(5, 1fr) !important; }
   .cal-header-cell { font-size: 0.55rem; padding: 0.25rem 0; letter-spacing: 0; }
-  .cal-header-cell.weekend-col { display: none; }
   .cal-grid { gap: 2px; grid-template-columns: repeat(5, 1fr) !important; }
   .day-cell.weekend { display: none; }
 
@@ -618,9 +617,14 @@ function render() {
   // Headers
   const hdr = document.getElementById('calHeaders');
   hdr.innerHTML = '';
-  DAY_NAMES.forEach((n,i) => {
+  const isMobile = window.innerWidth <= 600;
+  // On mobile show Mon-Fri only; on desktop show Sun-Sat
+  const headerDays = isMobile
+    ? ['MON','TUE','WED','THU','FRI']
+    : ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  headerDays.forEach(n => {
     const c = document.createElement('div');
-    c.className = 'cal-header-cell' + (i>0&&i<6?' weekday':'') + (i===0||i===6?' weekend-col':'');
+    c.className = 'cal-header-cell weekday';
     c.textContent = n;
     hdr.appendChild(c);
   });
@@ -628,14 +632,16 @@ function render() {
   const grid = document.getElementById('calGrid');
   grid.innerHTML = '';
 
-  const isMobile = window.innerWidth <= 600;
-  const firstDow   = new Date(viewYear, viewMonth-1, 1).getDay();
-  // On mobile we show Mon-Fri only, so offset = firstDow - 1 (Mon=0), clamped to 0-4
-  const mobileOffset = Math.max(0, firstDow - 1);
-  const gridOffset = isMobile ? mobileOffset : firstDow;
+  const firstDow    = new Date(viewYear, viewMonth-1, 1).getDay(); // 0=Sun
   const daysInMonth = new Date(viewYear, viewMonth, 0).getDate();
 
-  // Empty cells
+  // On mobile grid starts Monday (col 0 = Mon), on desktop starts Sunday (col 0 = Sun)
+  // firstDow: 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+  // Mobile offset: Mon=0, Tue=1, Wed=2, Thu=3, Fri=4, Sat=5(wrap), Sun=6(wrap)
+  const mobileFirstOffset = (firstDow + 6) % 7; // convert Sun-based to Mon-based
+  const gridOffset = isMobile ? mobileFirstOffset : firstDow;
+
+  // Empty placeholder cells
   for (let i = 0; i < gridOffset; i++) {
     const e = document.createElement('div');
     e.className = 'day-cell empty';
