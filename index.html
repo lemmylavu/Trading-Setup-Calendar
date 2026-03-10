@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S1 Strategy Calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06080d;
+  --surf: #0d1117;
+  --surf2: #131720;
+  --surf3: #181e2a;
+  --border: #1c2235;
+  --border2: #242c3f;
+  --text: #dde3f0;
+  --dim: #6b7894;
+  --muted: #3a4260;
+
+  --green:  #0fcc8a;
+  --green-bg: rgba(15,204,138,0.08);
+  --red:    #ff4d6a;
+  --red-bg: rgba(255,77,106,0.07);
+  --blue:   #3d8eff;
+  --blue-bg: rgba(61,142,255,0.08);
+  --gold:   #f0b429;
+  --gold-bg: rgba(240,180,41,0.08);
+  --purple: #9b6bff;
+  --purple-bg: rgba(155,107,255,0.08);
+  --orange: #ff7e3d;
+  --orange-bg: rgba(255,126,61,0.08);
+
+  --tp-color:   #0fcc8a;
+  --sl-b-color: #ff4d6a;
+  --sl-s-color: #ff8f4d;
+  --nt-bull:    #3d8eff;
+  --nt-bear:    #9b6bff;
+  --nt-side:    #6b7894;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  display: flex; flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 0.9rem 2rem;
+  background: var(--surf);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50;
+}
+.brand {
+  font-family: 'Space Mono', monospace;
+  font-size: 1.15rem; font-weight: 700;
+  color: var(--green);
+  letter-spacing: -1px;
+  text-shadow: 0 0 20px rgba(15,204,138,0.35);
+  white-space: nowrap;
+}
+.nav-month {
+  display: flex; align-items: center; gap: 0.6rem; margin-left: auto;
+}
+.nav-btn {
+  background: var(--surf2); border: 1px solid var(--border2);
+  color: var(--dim); width: 32px; height: 32px; border-radius: 6px;
+  cursor: pointer; font-size: 1rem; display: flex; align-items: center;
+  justify-content: center; transition: all 0.15s; flex-shrink: 0;
+}
+.nav-btn:hover { border-color: var(--green); color: var(--green); }
+.month-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 1rem; font-weight: 700; color: var(--text);
+  min-width: 180px; text-align: center; letter-spacing: -0.5px;
+}
+.today-btn {
+  padding: 0.35rem 0.85rem; background: transparent;
+  border: 1px solid var(--border2); border-radius: 6px;
+  color: var(--dim); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  transition: all 0.15s;
+}
+.today-btn:hover { border-color: var(--green); color: var(--green); }
+
+/* ── LEGEND BAR ── */
+.legend-bar {
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+  padding: 0.6rem 2rem;
+  background: var(--surf);
+  border-bottom: 1px solid var(--border);
+}
+.lg { display: flex; align-items: center; gap: 0.35rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.3px; }
+.lg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.lg-sep { width: 1px; height: 14px; background: var(--border2); margin: 0 0.3rem; }
+.legend-bar .note { margin-left: auto; font-size: 0.65rem; color: var(--muted); }
+
+/* ── CALENDAR WRAP ── */
+.cal-wrap { flex: 1; padding: 1.5rem 2rem 2rem; }
+
+/* ── DAY HEADERS ── */
+.cal-headers {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 4px; margin-bottom: 4px;
+}
+.cal-header-cell {
+  text-align: center; padding: 0.4rem;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted);
+}
+.cal-header-cell.weekday { color: var(--dim); }
+
+/* ── CALENDAR GRID ── */
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.day-cell {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-height: 130px;
+  padding: 8px;
+  display: flex; flex-direction: column;
+  position: relative;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: pointer;
+  overflow: hidden;
+}
+.day-cell:hover { border-color: var(--border2); background: var(--surf2); }
+.day-cell.empty { background: transparent; border-color: transparent; cursor: default; }
+.day-cell.weekend { background: rgba(6,8,13,0.4); opacity: 0.5; cursor: default; }
+.day-cell.today {
+  border-color: var(--green) !important;
+  box-shadow: 0 0 0 1px var(--green), inset 0 0 30px rgba(15,204,138,0.04);
+}
+.day-cell.has-alert {
+  border-color: var(--gold) !important;
+  background: rgba(240,180,41,0.03);
+}
+
+/* day number */
+.dn {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem; font-weight: 700;
+  color: var(--dim); margin-bottom: 6px; line-height: 1;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.day-cell.today .dn-num { color: var(--green); }
+.today-pip {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+
+/* outcome badge */
+.outcome-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 7px; border-radius: 4px; margin-bottom: 5px;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.5px;
+  cursor: pointer; width: fit-content;
+  transition: opacity 0.15s;
+}
+.outcome-badge:hover { opacity: 0.8; }
+.ob-tpb  { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(15,204,138,0.3); }
+.ob-tps  { background: rgba(15,204,138,0.05); color: #0faa72; border: 1px solid rgba(15,204,138,0.2); }
+.ob-slb  { background: var(--red-bg);    color: var(--red);    border: 1px solid rgba(255,77,106,0.3); }
+.ob-sls  { background: var(--orange-bg); color: var(--orange); border: 1px solid rgba(255,126,61,0.3); }
+.ob-ntb  { background: var(--blue-bg);   color: var(--blue);   border: 1px solid rgba(61,142,255,0.3); }
+.ob-ntbr { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(155,107,255,0.3); }
+.ob-nts  { background: rgba(107,120,148,0.1); color: var(--dim); border: 1px solid rgba(107,120,148,0.25); }
+
+/* setup chips */
+.setups { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.setup-chip {
+  display: flex; align-items: flex-start; gap: 5px;
+  padding: 4px 6px; border-radius: 5px;
+  font-size: 0.6rem; font-weight: 600; line-height: 1.35;
+  border-left: 2px solid transparent;
+}
+.setup-chip .chip-wr {
+  margin-left: auto; flex-shrink: 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem; color: inherit; opacity: 0.7;
+}
+
+.chip-new  { background: var(--green-bg);  color: var(--green);  border-left-color: var(--green); }
+.chip-sea  { background: var(--gold-bg);   color: var(--gold);   border-left-color: var(--gold); }
+.chip-nt   { background: var(--blue-bg);   color: var(--blue);   border-left-color: var(--blue); }
+.chip-sl   { background: var(--red-bg);    color: var(--red);    border-left-color: var(--red); }
+.chip-ntbr { background: var(--purple-bg); color: var(--purple); border-left-color: var(--purple); }
+
+/* outcome picker popup */
+.picker-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(6,8,13,0.75); backdrop-filter: blur(4px);
+}
+.picker-overlay.open { display: flex; }
+.picker-box {
+  background: var(--surf2); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 1.5rem; width: 300px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.picker-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem; font-weight: 700; color: var(--text);
+  margin-bottom: 1rem; letter-spacing: -0.3px;
+}
+.picker-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
+.picker-section-label {
+  grid-column: 1 / -1;
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted);
+  padding-top: 0.25rem;
+}
+.picker-opt {
+  padding: 0.6rem 0.75rem; border-radius: 7px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.3px;
+  cursor: pointer; border: 1px solid transparent;
+  text-align: center; transition: all 0.15s;
+}
+.picker-opt:hover { filter: brightness(1.2); transform: translateY(-1px); }
+.picker-opt.selected { outline: 2px solid currentColor; outline-offset: 2px; }
+.picker-clear {
+  width: 100%; padding: 0.5rem; border-radius: 6px;
+  background: transparent; border: 1px solid var(--border2);
+  color: var(--dim); font-size: 0.7rem; font-weight: 600;
+  cursor: pointer; font-family: 'Bricolage Grotesque', sans-serif;
+  transition: all 0.15s;
+}
+.picker-clear:hover { border-color: var(--red); color: var(--red); }
+.picker-cancel {
+  width: 100%; padding: 0.45rem; border-radius: 6px; margin-top: 0.4rem;
+  background: transparent; border: 1px solid transparent;
+  color: var(--muted); font-size: 0.68rem; font-weight: 600;
+  cursor: pointer; font-family: 'Bricolage Grotesque', sans-serif;
+  transition: color 0.15s;
+}
+.picker-cancel:hover { color: var(--dim); }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">S1 ◆ STRATEGY</div>
+  <div id="saveIndicator" style="font-size:0.65rem;color:var(--dim);font-family:'Space Mono',monospace;display:none">✓ saved</div>
+  <div class="nav-month">
+    <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+    <div class="month-label" id="monthLabel"></div>
+    <button class="nav-btn" onclick="changeMonth(1)">›</button>
+    <button class="today-btn" onclick="goToday()">Today</button>
+    <button class="today-btn" style="color:var(--red);border-color:rgba(255,77,106,0.3)" onclick="clearAllData()">Clear All</button>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend-bar">
+  <div class="lg"><div class="lg-dot" style="background:var(--green)"></div><span style="color:var(--green)">NEW SETUP</span></div>
+  <div class="lg-sep"></div>
+  <div class="lg"><div class="lg-dot" style="background:var(--gold)"></div><span style="color:var(--gold)">SEASONAL</span></div>
+  <div class="lg-sep"></div>
+  <div class="lg"><div class="lg-dot" style="background:var(--blue)"></div><span style="color:var(--blue)">NO TRADE → BULLISH</span></div>
+  <div class="lg"><div class="lg-dot" style="background:var(--purple)"></div><span style="color:var(--purple)">NO TRADE → BEARISH</span></div>
+  <div class="lg-sep"></div>
+  <div class="lg"><div class="lg-dot" style="background:var(--red)"></div><span style="color:var(--red)">SL-BASED</span></div>
+  <div class="lg-sep"></div>
+  <div class="lg"><div class="lg-dot" style="background:var(--gold);border-radius:50%"></div><span style="color:var(--gold)">⚡ triggered by previous day</span></div>
+  <div class="note">Click any trading day to log its outcome</div>
+</div>
+
+<!-- CALENDAR -->
+<div class="cal-wrap">
+  <div class="cal-headers" id="calHeaders"></div>
+  <div class="cal-grid" id="calGrid"></div>
+</div>
+
+<!-- OUTCOME PICKER -->
+<div class="picker-overlay" id="pickerOverlay">
+  <div class="picker-box">
+    <div class="picker-title" id="pickerTitle">Log outcome</div>
+    <div class="picker-grid">
+      <div class="picker-section-label">Take Profit</div>
+      <div class="picker-opt ob-tpb"  onclick="setOutcome('TP-BUY')">✓ TP — Buy</div>
+      <div class="picker-opt ob-tps"  onclick="setOutcome('TP-SELL')">✓ TP — Sell</div>
+      <div class="picker-opt" style="visibility:hidden"></div>
+      <div class="picker-section-label">Stop Loss</div>
+      <div class="picker-opt ob-slb"  onclick="setOutcome('SL-BUY')">✗ SL — Buy</div>
+      <div class="picker-opt ob-sls"  onclick="setOutcome('SL-SELL')">✗ SL — Sell</div>
+      <div class="picker-opt" style="visibility:hidden"></div>
+      <div class="picker-section-label">No Trade</div>
+      <div class="picker-opt ob-ntb"  onclick="setOutcome('NT-BULL')">— NT Bullish</div>
+      <div class="picker-opt ob-ntbr" onclick="setOutcome('NT-BEAR')">— NT Bearish</div>
+      <div class="picker-opt ob-nts"  onclick="setOutcome('NT-SIDE')">— NT Sideways</div>
+    </div>
+    <button class="picker-clear" onclick="setOutcome(null)">Clear outcome</button>
+    <button class="picker-cancel" onclick="closePicker()">Cancel</button>
+  </div>
+</div>
+
+<script>
+const MONTHS_FULL = ['January','February','March','April','May','June',
+                     'July','August','September','October','November','December'];
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAY_FULL  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+const today = new Date();
+let viewYear  = today.getFullYear();
+let viewMonth = today.getMonth() + 1; // 1-based
+
+// outcomes[key] = 'TP-BUY'|'TP-SELL'|'SL-BUY'|'SL-SELL'|'NT-BULL'|'NT-BEAR'|'NT-SIDE'
+const STORAGE_KEY = 's1_calendar_outcomes';
+const outcomes = {};
+let pickerTarget = null;
+
+function oKey(y,m,d) { return `${y}-${m}-${d}`; }
+
+function saveOutcomes() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(outcomes));
+    const ind = document.getElementById('saveIndicator');
+    if (ind) {
+      ind.style.display = 'block';
+      clearTimeout(ind._t);
+      ind._t = setTimeout(() => ind.style.display = 'none', 1500);
+    }
+  } catch(e) {}
+}
+function loadOutcomes() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { const data = JSON.parse(raw); Object.assign(outcomes, data); }
+  } catch(e) {}
+}
+function clearAllData() {
+  if (!confirm('Clear ALL logged outcomes? This cannot be undone.')) return;
+  Object.keys(outcomes).forEach(k => delete outcomes[k]);
+  saveOutcomes();
+  render();
+}
+
+// ── Week-of-month (wall calendar, Sun-start) ──────────────────────────────
+function weekOfMonth(y,m,d) {
+  const firstDow = new Date(y,m-1,1).getDay(); // 0=Sun
+  return Math.floor((firstDow + d - 1) / 7) + 1;
+}
+
+// ── Outcome helpers ───────────────────────────────────────────────────────
+function isSLBuy(o)   { return o === 'SL-BUY'; }
+function isSLSell(o)  { return o === 'SL-SELL'; }
+function isSL(o)      { return o === 'SL-BUY' || o === 'SL-SELL'; }
+function isNTBull(o)  { return o === 'NT-BULL'; }
+function isNTBear(o)  { return o === 'NT-BEAR'; }
+function isNTSide(o)  { return o === 'NT-SIDE'; }
+function isNT(o)      { return o && o.startsWith('NT-'); }
+function isTP(o)      { return o === 'TP-BUY' || o === 'TP-SELL'; }
+function isTPBuy(o)   { return o === 'TP-BUY'; }
+function isTPSell(o)  { return o === 'TP-SELL'; }
+
+// ── Get previous TRADING day outcome ─────────────────────────────────────
+function prevTradingDay(y, m, d) {
+  let dt = new Date(y, m-1, d);
+  do {
+    dt.setDate(dt.getDate() - 1);
+  } while (dt.getDay() === 0 || dt.getDay() === 6);
+  return { y: dt.getFullYear(), m: dt.getMonth()+1, d: dt.getDate() };
+}
+
+function getPrevOutcome(y, m, d) {
+  const p = prevTradingDay(y, m, d);
+  return outcomes[oKey(p.y, p.m, p.d)] || null;
+}
+
+// Also look back 2 trading days
+function prev2TradingDay(y, m, d) {
+  const p1 = prevTradingDay(y, m, d);
+  return prevTradingDay(p1.y, p1.m, p1.d);
+}
+
+// ── Rule engine ──────────────────────────────────────────────────────────
+// Returns array of {label, chipClass, wr, triggered}
+// triggered=true means it came from previous-day outcome (yellow border day)
+function getSetups(y, m, d) {
+  const dow = new Date(y, m-1, d).getDay();
+  if (dow === 0 || dow === 6) return [];
+
+  const setups = [];
+  const prevO  = getPrevOutcome(y, m, d);
+  const p2     = prev2TradingDay(y, m, d);
+  const prev2O = outcomes[oKey(p2.y, p2.m, p2.d)] || null;
+  const wom    = weekOfMonth(y, m, d);
+
+  // ── NEW SETUP ────────────────────────────────────────────────────────
+  if (dow === 1 && wom === 1) {
+    setups.push({ label:'Mon — Week 1 of month', chipClass:'chip-new', wr:'100%', triggered:false });
+  }
+
+  // ── SEASONAL ─────────────────────────────────────────────────────────
+  if (m===12 && dow===2 && wom!==4)
+    setups.push({ label:'Dec Tuesday (not Wk4)', chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+  if (m===3  && dow===2)
+    setups.push({ label:'March Tuesday',          chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+  if (m===3  && dow===5)
+    setups.push({ label:'March Friday',           chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+  if (m===4  && dow===1)
+    setups.push({ label:'April Monday',           chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+  if (m===7  && dow===5)
+    setups.push({ label:'July Friday',            chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+  if (m===9  && dow===4)
+    setups.push({ label:'September Thursday',     chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+  if (m===10 && dow===2)
+    setups.push({ label:'October Tuesday',        chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+
+  // ── NO TRADE BASED (triggered by previous day) ───────────────────────
+  // Rule NT1: Thu was NO TRADE + Bullish → trade Fri
+  if (dow === 5 && isNTBull(prevO)) {
+    setups.push({ label:'⚡ Thu NT Bullish → Trade today (Fri)', chipClass:'chip-nt', wr:'100%', triggered:true });
+  }
+  // Rule NT2: Fri was NO TRADE + Bullish → Buy on Mon
+  if (dow === 1 && isNTBull(prevO)) {
+    setups.push({ label:'⚡ Fri NT Bullish → BUY today (Mon)', chipClass:'chip-nt', wr:'100%', triggered:true });
+  }
+  // General: prev day was NT Bullish
+  if (isNTBull(prevO) && !(dow===5) && !(dow===1)) {
+    setups.push({ label:'⚡ Prev day NT Bullish', chipClass:'chip-nt', wr:'~94%', triggered:true });
+  }
+  // General: prev day was NT Bearish
+  if (isNTBear(prevO)) {
+    setups.push({ label:'⚡ Prev day NT Bearish', chipClass:'chip-ntbr', wr:'~97%', triggered:true });
+  }
+
+  // ── SL-BASED (triggered) ─────────────────────────────────────────────
+  // Rule SL1: After SL → trade if BO is opposite direction
+  if (isSLBuy(prevO)) {
+    setups.push({ label:'⚡ Prev SL-Buy → Watch for SELL BO', chipClass:'chip-sl', wr:'97.48%', triggered:true });
+  }
+  if (isSLSell(prevO)) {
+    setups.push({ label:'⚡ Prev SL-Sell → Watch for BUY BO', chipClass:'chip-sl', wr:'97.48%', triggered:true });
+  }
+
+  // Rule SL2: After 2 consecutive SLs → trade
+  if (isSL(prevO) && isSL(prev2O)) {
+    setups.push({ label:'⚡ 2 Consecutive SLs → Trade', chipClass:'chip-sl', wr:'100%', triggered:true });
+  }
+
+  // Rule SL3: Mon was SL → Trade Tue & Wed
+  if (dow === 2 || dow === 3) {
+    // find most recent Monday
+    const monDate = new Date(y, m-1, d);
+    while (monDate.getDay() !== 1) monDate.setDate(monDate.getDate() - 1);
+    const monO = outcomes[oKey(monDate.getFullYear(), monDate.getMonth()+1, monDate.getDate())];
+    if (isSL(monO)) {
+      setups.push({ label:'⚡ Mon was SL → Trade today', chipClass:'chip-sl', wr:'100%', triggered:true });
+    }
+  }
+
+  // Rule SL4: SL-Sell → next day BO is Buy → Trade
+  if (isSLSell(prevO)) {
+    setups.push({ label:'⚡ SL-Sell prev day → BUY BO today', chipClass:'chip-sl', wr:'100%', triggered:true });
+  }
+
+  return setups;
+}
+
+// ── Outcome display ───────────────────────────────────────────────────────
+const OBadge = {
+  'TP-BUY':  ['ob-tpb',  '✓ TP Buy'],
+  'TP-SELL': ['ob-tps',  '✓ TP Sell'],
+  'SL-BUY':  ['ob-slb',  '✗ SL Buy'],
+  'SL-SELL': ['ob-sls',  '✗ SL Sell'],
+  'NT-BULL': ['ob-ntb',  '— NT Bullish'],
+  'NT-BEAR': ['ob-ntbr', '— NT Bearish'],
+  'NT-SIDE': ['ob-nts',  '— NT Sideways'],
+};
+
+// ── Render ────────────────────────────────────────────────────────────────
+function render() {
+  document.getElementById('monthLabel').textContent =
+    `${MONTHS_FULL[viewMonth-1]} ${viewYear}`;
+
+  // Headers
+  const hdr = document.getElementById('calHeaders');
+  hdr.innerHTML = '';
+  DAY_NAMES.forEach((n,i) => {
+    const c = document.createElement('div');
+    c.className = 'cal-header-cell' + (i>0&&i<6?' weekday':'');
+    c.textContent = n;
+    hdr.appendChild(c);
+  });
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  const firstDow   = new Date(viewYear, viewMonth-1, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth, 0).getDate();
+
+  // Empty cells
+  for (let i = 0; i < firstDow; i++) {
+    const e = document.createElement('div');
+    e.className = 'day-cell empty';
+    grid.appendChild(e);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dow = new Date(viewYear, viewMonth-1, d).getDay();
+    const isWeekend = dow===0 || dow===6;
+    const isToday   = viewYear===today.getFullYear() &&
+                      viewMonth===today.getMonth()+1 &&
+                      d===today.getDate();
+    const key    = oKey(viewYear, viewMonth, d);
+    const outcome = outcomes[key] || null;
+    const setups  = getSetups(viewYear, viewMonth, d);
+    const hasTriggered = setups.some(s=>s.triggered);
+
+    const cell = document.createElement('div');
+    let cls = 'day-cell';
+    if (isWeekend)    cls += ' weekend';
+    if (isToday)      cls += ' today';
+    if (hasTriggered && !isWeekend) cls += ' has-alert';
+    cell.className = cls;
+
+    // Day number row
+    let html = `<div class="dn">
+      <span class="dn-num">${d}</span>
+      ${isToday ? '<div class="today-pip"></div>' : ''}
+    </div>`;
+
+    if (!isWeekend) {
+      // Outcome badge
+      if (outcome) {
+        const [cls2, label] = OBadge[outcome];
+        html += `<div class="outcome-badge ${cls2}" onclick="openPicker(event,${viewYear},${viewMonth},${d})">${label}</div>`;
+      }
+
+      // Setup chips
+      if (setups.length) {
+        html += `<div class="setups">`;
+        setups.forEach(s => {
+          html += `<div class="setup-chip ${s.chipClass}">
+            <span>${s.label}</span>
+            <span class="chip-wr">${s.wr}</span>
+          </div>`;
+        });
+        html += `</div>`;
+      }
+
+      if (!outcome && !setups.length) {
+        html += `<div style="flex:1;display:flex;align-items:flex-end;padding-bottom:2px">
+          <span style="font-size:0.58rem;color:var(--muted)">tap to log</span>
+        </div>`;
+      }
+    }
+
+    cell.innerHTML = html;
+
+    if (!isWeekend) {
+      cell.addEventListener('click', (e) => {
+        if (e.target.closest('.outcome-badge')) return;
+        openPicker(e, viewYear, viewMonth, d);
+      });
+    }
+
+    grid.appendChild(cell);
+  }
+}
+
+// ── Picker ────────────────────────────────────────────────────────────────
+function openPicker(e, y, m, d) {
+  e.stopPropagation();
+  pickerTarget = {y,m,d};
+  const dow = new Date(y,m-1,d).getDay();
+  document.getElementById('pickerTitle').textContent =
+    `${DAY_FULL[dow]}, ${MONTHS_FULL[m-1]} ${d} — Log outcome`;
+
+  // Mark current selection
+  const opts = document.querySelectorAll('.picker-opt[onclick]');
+  const cur = outcomes[oKey(y,m,d)];
+  const map = {'TP-BUY':0,'TP-SELL':1,'SL-BUY':2,'SL-SELL':3,'NT-BULL':4,'NT-BEAR':5,'NT-SIDE':6};
+  opts.forEach((o,i) => o.classList.toggle('selected', cur !== undefined && map[cur]===i));
+
+  document.getElementById('pickerOverlay').classList.add('open');
+}
+
+function closePicker() {
+  document.getElementById('pickerOverlay').classList.remove('open');
+  pickerTarget = null;
+}
+
+function setOutcome(val) {
+  if (!pickerTarget) return;
+  const k = oKey(pickerTarget.y, pickerTarget.m, pickerTarget.d);
+  if (val === null) delete outcomes[k];
+  else outcomes[k] = val;
+  saveOutcomes();
+  closePicker();
+  render();
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────
+function changeMonth(delta) {
+  viewMonth += delta;
+  if (viewMonth > 12) { viewMonth = 1;  viewYear++; }
+  if (viewMonth < 1)  { viewMonth = 12; viewYear--; }
+  render();
+}
+
+function goToday() {
+  viewYear  = today.getFullYear();
+  viewMonth = today.getMonth() + 1;
+  render();
+}
+
+// Close picker on overlay click
+document.getElementById('pickerOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closePicker();
+});
+
+// Init
+loadOutcomes();
+render();
+</script>
+</body>
+</html>
