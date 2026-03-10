@@ -301,8 +301,12 @@ body {
     font-size: 0.5rem; padding: 2px 4px;
     line-height: 1.3; border-left-width: 2px;
     white-space: normal; word-break: break-word;
+    flex-direction: column; align-items: flex-start; gap: 1px;
   }
-  .setup-chip .chip-wr { display: inline; font-size: 0.45rem; opacity: 0.75; }
+  .setup-chip .chip-wr { 
+    display: block; font-size: 0.48rem; opacity: 0.75;
+    margin-left: 0;
+  }
 
   /* Picker — bottom sheet on mobile */
   .picker-overlay { align-items: flex-end; }
