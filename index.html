@@ -555,16 +555,16 @@ function getSetups(y, m, d) {
     setups.push({ label:'Oct Tue', chipClass:'chip-sea', wr:'2k:85% 4k:100%', triggered:false });
 
   // ── NO TRADE BASED (triggered by previous day) ───────────────────────
-  // Rule 1: Thu = NO TRADE + Bullish → trade Fri (100%)
+  // Rule 1: Thu = NO TRADE + Bullish → trade Fri (100% 4k)
   if (dow === 5 && isNTBull(prevO)) {
-    setups.push({ label:'⚡ Thu NT Bull → Fri', chipClass:'chip-nt', wr:'2k:88% 4k:100%', triggered:true });
+    setups.push({ label:'⚡ Thu NT Bull → Fri', chipClass:'chip-nt', wr:'2k:80% 4k:100%', triggered:true });
   }
-  // Rule 2: Fri = NO TRADE + Bullish → Buy Mon (100%)
-  if (dow === 1 && isNTBull(prevO)) {
-    setups.push({ label:'⚡ Fri NT Bull → Mon', chipClass:'chip-nt', wr:'2k:78% 4k:100%', triggered:true });
+  // Rule 2: Fri = NO TRADE + Bullish → Buy Mon (100% 4k)
+  else if (dow === 1 && isNTBull(prevO)) {
+    setups.push({ label:'⚡ Fri NT Bull → Mon', chipClass:'chip-nt', wr:'2k:72% 4k:100%', triggered:true });
   }
-  // General NT Bull (other days)
-  if (isNTBull(prevO) && !(dow===5) && !(dow===1)) {
+  // General NT Bull (any other day after NT Bull)
+  else if (isNTBull(prevO)) {
     setups.push({ label:'⚡ NT Bull', chipClass:'chip-nt', wr:'2k:83% 4k:94%', triggered:true });
   }
   // NT Bear — not a confirmed 100% rule
@@ -577,7 +577,7 @@ function getSetups(y, m, d) {
     setups.push({ label:'⚡ SL-Buy → Sell BO', chipClass:'chip-sl', wr:'2k:87% 4k:97%', triggered:true });
   }
   if (isSLSell(prevO)) {
-    setups.push({ label:'⚡ SL-Sell → Buy BO', chipClass:'chip-sl', wr:'2k:87% 4k:100%', triggered:true });
+    setups.push({ label:'⚡ SL-Sell → Buy BO', chipClass:'chip-sl', wr:'2k:87% 4k:97%', triggered:true });
   }
 
   // Rule SL2: After 2 consecutive SLs → trade
@@ -591,7 +591,7 @@ function getSetups(y, m, d) {
     while (monDate.getDay() !== 1) monDate.setDate(monDate.getDate() - 1);
     const monO = outcomes[oKey(monDate.getFullYear(), monDate.getMonth()+1, monDate.getDate())];
     if (isSL(monO)) {
-      setups.push({ label:'⚡ Mon SL → Trade', chipClass:'chip-sl', wr:'2k:87% 4k:94%', triggered:true });
+      setups.push({ label:'⚡ Mon SL → Trade', chipClass:'chip-sl', wr:'2k:87% 4k:100%', triggered:true });
     }
   }
 
