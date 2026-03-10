@@ -260,7 +260,7 @@ body {
     gap: 0.4rem;
     flex-wrap: wrap;
   }
-  .brand { font-size: 0.9rem; flex-shrink: 0; }
+  .brand { font-size: 0.72rem; flex-shrink: 0; }
   #saveIndicator { font-size: 0.55rem; margin-left: auto; }
 
   /* Nav row takes full width on mobile */
@@ -326,7 +326,7 @@ body {
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <div class="brand">S1 ◆ STRATEGY</div>
+  <div class="brand">TRADING SETUP CALENDAR</div>
   <div id="saveIndicator" style="font-size:0.65rem;color:var(--dim);font-family:'Space Mono',monospace;display:none">✓ saved</div>
   <div class="nav-month">
     <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
@@ -339,14 +339,15 @@ body {
 
 <!-- LEGEND -->
 <div class="legend-bar">
-  <div class="lg"><div class="lg-dot" style="background:var(--green)"></div><span style="color:var(--green)">NEW SETUP</span></div>
+  <div class="lg"><div class="lg-dot" style="background:var(--green)"></div><span style="color:var(--green)">TP</span></div>
   <div class="lg-sep"></div>
   <div class="lg"><div class="lg-dot" style="background:var(--gold)"></div><span style="color:var(--gold)">SEASONAL</span></div>
   <div class="lg-sep"></div>
   <div class="lg"><div class="lg-dot" style="background:var(--blue)"></div><span style="color:var(--blue)">NO TRADE → BULLISH</span></div>
   <div class="lg"><div class="lg-dot" style="background:var(--purple)"></div><span style="color:var(--purple)">NO TRADE → BEARISH</span></div>
   <div class="lg-sep"></div>
-  <div class="lg"><div class="lg-dot" style="background:var(--red)"></div><span style="color:var(--red)">SL-BASED</span></div>
+  <div class="lg"><div class="lg-dot" style="background:var(--red)"></div><span style="color:var(--red)">SL → Buy</span></div>
+  <div class="lg"><div class="lg-dot" style="background:var(--orange)"></div><span style="color:var(--orange)">SL → Sell</span></div>
   <div class="lg-sep"></div>
   <div class="lg"><div class="lg-dot" style="background:var(--gold);border-radius:50%"></div><span style="color:var(--gold)">⚡ triggered by previous day</span></div>
   <div class="note">Click any trading day to log its outcome</div>
