@@ -651,6 +651,10 @@ function render() {
   for (let d = 1; d <= daysInMonth; d++) {
     const dow = new Date(viewYear, viewMonth-1, d).getDay();
     const isWeekend = dow===0 || dow===6;
+
+    // On mobile, skip weekend days entirely — don't add to grid
+    if (isMobile && isWeekend) continue;
+
     const isToday   = viewYear===today.getFullYear() &&
                       viewMonth===today.getMonth()+1 &&
                       d===today.getDate();
