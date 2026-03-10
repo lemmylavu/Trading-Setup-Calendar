@@ -322,34 +322,93 @@ const today = new Date();
 let viewYear  = today.getFullYear();
 let viewMonth = today.getMonth() + 1; // 1-based
 
+// ── Firebase config ───────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyDeEpHWlnfjNaPnKnI-NTF76AXttvQ10kI",
+  authDomain: "trading-setup-calendar.firebaseapp.com",
+  databaseURL: "https://trading-setup-calendar-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "trading-setup-calendar",
+  storageBucket: "trading-setup-calendar.firebasestorage.app",
+  messagingSenderId: "739372960208",
+  appId: "1:739372960208:web:8544dfbfb8b877717b11d5"
+};
+
 // outcomes[key] = 'TP-BUY'|'TP-SELL'|'SL-BUY'|'SL-SELL'|'NT-BULL'|'NT-BEAR'|'NT-SIDE'
-const STORAGE_KEY = 's1_calendar_outcomes';
 const outcomes = {};
 let pickerTarget = null;
+let dbRef = null;
 
 function oKey(y,m,d) { return `${y}-${m}-${d}`; }
 
+function showSaveIndicator(msg, color) {
+  const ind = document.getElementById('saveIndicator');
+  if (!ind) return;
+  ind.textContent = msg || '✓ saved';
+  ind.style.color = color || 'var(--dim)';
+  ind.style.display = 'block';
+  clearTimeout(ind._t);
+  ind._t = setTimeout(() => ind.style.display = 'none', 2000);
+}
+
 function saveOutcomes() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(outcomes));
-    const ind = document.getElementById('saveIndicator');
-    if (ind) {
-      ind.style.display = 'block';
-      clearTimeout(ind._t);
-      ind._t = setTimeout(() => ind.style.display = 'none', 1500);
-    }
-  } catch(e) {}
+  if (dbRef) {
+    dbRef.set(outcomes)
+      .then(() => showSaveIndicator('☁ synced', 'var(--green)'))
+      .catch(() => {
+        // fallback to localStorage
+        try { localStorage.setItem('s1_calendar_outcomes', JSON.stringify(outcomes)); } catch(e) {}
+        showSaveIndicator('✓ saved locally', 'var(--gold)');
+      });
+  } else {
+    try { localStorage.setItem('s1_calendar_outcomes', JSON.stringify(outcomes)); } catch(e) {}
+    showSaveIndicator('✓ saved', 'var(--dim)');
+  }
 }
+
 function loadOutcomes() {
+  // Show connecting status
+  showSaveIndicator('connecting...', 'var(--dim)');
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) { const data = JSON.parse(raw); Object.assign(outcomes, data); }
-  } catch(e) {}
+    // Init Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    dbRef = db.ref('outcomes');
+
+    // Listen for real-time changes (syncs across all devices instantly)
+    dbRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      // Clear current outcomes
+      Object.keys(outcomes).forEach(k => delete outcomes[k]);
+      if (data) Object.assign(outcomes, data);
+      showSaveIndicator('☁ connected', 'var(--green)');
+      render();
+    }, (err) => {
+      showSaveIndicator('⚠ offline', 'var(--gold)');
+      // fallback localStorage
+      try {
+        const raw = localStorage.getItem('s1_calendar_outcomes');
+        if (raw) Object.assign(outcomes, JSON.parse(raw));
+      } catch(e) {}
+      render();
+    });
+  } catch(e) {
+    showSaveIndicator('⚠ local only', 'var(--gold)');
+    try {
+      const raw = localStorage.getItem('s1_calendar_outcomes');
+      if (raw) Object.assign(outcomes, JSON.parse(raw));
+    } catch(e2) {}
+    render();
+  }
 }
+
 function clearAllData() {
   if (!confirm('Clear ALL logged outcomes? This cannot be undone.')) return;
   Object.keys(outcomes).forEach(k => delete outcomes[k]);
-  saveOutcomes();
+  if (dbRef) {
+    dbRef.set({}).catch(() => {});
+  }
+  try { localStorage.removeItem('s1_calendar_outcomes'); } catch(e) {}
+  showSaveIndicator('☁ cleared', 'var(--red)');
   render();
 }
 
@@ -629,9 +688,30 @@ document.getElementById('pickerOverlay').addEventListener('click', function(e) {
   if (e.target === this) closePicker();
 });
 
-// Init
-loadOutcomes();
+// Init — render immediately then load Firebase
 render();
+loadOutcomes();
+</script>
+
+<!-- Firebase SDK (loaded at end for performance) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+// Re-init Firebase after SDK loads
+(function() {
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    dbRef = db.ref('outcomes');
+    dbRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      Object.keys(outcomes).forEach(k => delete outcomes[k]);
+      if (data) Object.assign(outcomes, data);
+      showSaveIndicator('☁ connected', 'var(--green)');
+      render();
+    }, () => showSaveIndicator('⚠ offline mode', 'var(--gold)'));
+  } catch(e) { showSaveIndicator('⚠ local only', 'var(--gold)'); }
+})();
 </script>
 </body>
 </html>
