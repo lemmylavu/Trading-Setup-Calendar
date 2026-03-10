@@ -535,50 +535,50 @@ function getSetups(y, m, d) {
 
   // ── NEW SETUP ────────────────────────────────────────────────────────
   if (dow === 1 && wom === 1) {
-    setups.push({ label:'Mon Wk1', chipClass:'chip-new', wr:'100%', triggered:false });
+    setups.push({ label:'Mon Wk1', chipClass:'chip-new', wr:'2k:58% 4k:100%', triggered:false });
   }
 
   // ── SEASONAL ─────────────────────────────────────────────────────────
   if (m===12 && dow===2 && wom!==4)
-    setups.push({ label:'Dec Tue', chipClass:'chip-sea', wr:'100%', triggered:false });
+    setups.push({ label:'Dec Tue', chipClass:'chip-sea', wr:'2k:100% 4k:100%', triggered:false });
   if (m===3  && dow===2)
-    setups.push({ label:'Mar Tue', chipClass:'chip-sea', wr:'100%', triggered:false });
+    setups.push({ label:'Mar Tue', chipClass:'chip-sea', wr:'2k:78% 4k:100%', triggered:false });
   if (m===3  && dow===5)
-    setups.push({ label:'Mar Fri', chipClass:'chip-sea', wr:'100%', triggered:false });
+    setups.push({ label:'Mar Fri', chipClass:'chip-sea', wr:'2k:60% 4k:100%', triggered:false });
   if (m===4  && dow===1)
-    setups.push({ label:'Apr Mon', chipClass:'chip-sea', wr:'100%', triggered:false });
+    setups.push({ label:'Apr Mon', chipClass:'chip-sea', wr:'2k:57% 4k:100%', triggered:false });
   if (m===7  && dow===5)
-    setups.push({ label:'Jul Fri', chipClass:'chip-sea', wr:'100%', triggered:false });
+    setups.push({ label:'Jul Fri', chipClass:'chip-sea', wr:'2k:48% 4k:100%', triggered:false });
   if (m===9  && dow===4)
-    setups.push({ label:'Sep Thu', chipClass:'chip-sea', wr:'100%', triggered:false });
+    setups.push({ label:'Sep Thu', chipClass:'chip-sea', wr:'2k:70% 4k:100%', triggered:false });
   if (m===10 && dow===2)
-    setups.push({ label:'Oct Tue', chipClass:'chip-sea', wr:'100%', triggered:false });
+    setups.push({ label:'Oct Tue', chipClass:'chip-sea', wr:'2k:74% 4k:100%', triggered:false });
 
   // ── NO TRADE BASED (triggered by previous day) ───────────────────────
   if (dow === 5 && isNTBull(prevO)) {
-    setups.push({ label:'⚡ Thu NT Bull → Fri', chipClass:'chip-nt', wr:'100%', triggered:true });
+    setups.push({ label:'⚡ Thu NT → Fri', chipClass:'chip-nt', wr:'2k:88% 4k:94%', triggered:true });
   }
   if (dow === 1 && isNTBull(prevO)) {
-    setups.push({ label:'⚡ Fri NT Bull → Buy', chipClass:'chip-nt', wr:'100%', triggered:true });
+    setups.push({ label:'⚡ Fri NT → Mon', chipClass:'chip-nt', wr:'2k:78% 4k:78%', triggered:true });
   }
   if (isNTBull(prevO) && !(dow===5) && !(dow===1)) {
-    setups.push({ label:'⚡ NT Bull', chipClass:'chip-nt', wr:'~94%', triggered:true });
+    setups.push({ label:'⚡ NT Bull', chipClass:'chip-nt', wr:'2k:86% 4k:100%', triggered:true });
   }
   if (isNTBear(prevO)) {
-    setups.push({ label:'⚡ NT Bear', chipClass:'chip-ntbr', wr:'~97%', triggered:true });
+    setups.push({ label:'⚡ NT Bear', chipClass:'chip-ntbr', wr:'2k:91% 4k:100%', triggered:true });
   }
 
   // ── SL-BASED (triggered) ─────────────────────────────────────────────
   if (isSLBuy(prevO)) {
-    setups.push({ label:'⚡ SL-Buy → Sell BO', chipClass:'chip-sl', wr:'97.48%', triggered:true });
+    setups.push({ label:'⚡ SL-Buy → Sell BO', chipClass:'chip-sl', wr:'2k:60% 4k:97%', triggered:true });
   }
   if (isSLSell(prevO)) {
-    setups.push({ label:'⚡ SL-Sell → Buy BO', chipClass:'chip-sl', wr:'97.48%', triggered:true });
+    setups.push({ label:'⚡ SL-Sell → Buy BO', chipClass:'chip-sl', wr:'2k:60% 4k:100%', triggered:true });
   }
 
   // Rule SL2: After 2 consecutive SLs → trade
   if (isSL(prevO) && isSL(prev2O)) {
-    setups.push({ label:'⚡ 2x SL → Trade', chipClass:'chip-sl', wr:'100%', triggered:true });
+    setups.push({ label:'⚡ 2x SL → Trade', chipClass:'chip-sl', wr:'2k:66% 4k:100%', triggered:true });
   }
 
   // Rule SL3: Mon was SL → Trade Tue & Wed
@@ -587,13 +587,13 @@ function getSetups(y, m, d) {
     while (monDate.getDay() !== 1) monDate.setDate(monDate.getDate() - 1);
     const monO = outcomes[oKey(monDate.getFullYear(), monDate.getMonth()+1, monDate.getDate())];
     if (isSL(monO)) {
-      setups.push({ label:'⚡ Mon SL → Trade', chipClass:'chip-sl', wr:'100%', triggered:true });
+      setups.push({ label:'⚡ Mon SL → Trade', chipClass:'chip-sl', wr:'2k:72% 4k:100%', triggered:true });
     }
   }
 
   // Rule SL4: SL-Sell → next day BO is Buy → Trade
   if (isSLSell(prevO)) {
-    setups.push({ label:'⚡ SL-Sell → Buy today', chipClass:'chip-sl', wr:'100%', triggered:true });
+    setups.push({ label:'⚡ SL-Sell → Buy today', chipClass:'chip-sl', wr:'2k:60% 4k:100%', triggered:true });
   }
 
   return setups;
@@ -688,9 +688,10 @@ function render() {
       if (setups.length) {
         html += `<div class="setups">`;
         setups.forEach(s => {
+          const [wr1, wr2] = s.wr.split(' ');
           html += `<div class="setup-chip ${s.chipClass}">
             <span>${s.label}</span>
-            <span class="chip-wr">${s.wr}</span>
+            <span class="chip-wr">${wr1}${wr2 ? '<br>'+wr2 : ''}</span>
           </div>`;
         });
         html += `</div>`;
