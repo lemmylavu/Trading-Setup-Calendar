@@ -555,15 +555,19 @@ function getSetups(y, m, d) {
     setups.push({ label:'Oct Tue', chipClass:'chip-sea', wr:'2k:85% 4k:100%', triggered:false });
 
   // ── NO TRADE BASED (triggered by previous day) ───────────────────────
+  // Rule 1: Thu = NO TRADE + Bullish → trade Fri (100%)
   if (dow === 5 && isNTBull(prevO)) {
-    setups.push({ label:'⚡ Thu NT → Fri', chipClass:'chip-nt', wr:'2k:88% 4k:94%', triggered:true });
+    setups.push({ label:'⚡ Thu NT Bull → Fri', chipClass:'chip-nt', wr:'2k:88% 4k:100%', triggered:true });
   }
+  // Rule 2: Fri = NO TRADE + Bullish → Buy Mon (100%)
   if (dow === 1 && isNTBull(prevO)) {
-    setups.push({ label:'⚡ Fri NT → Mon', chipClass:'chip-nt', wr:'2k:78% 4k:78%', triggered:true });
+    setups.push({ label:'⚡ Fri NT Bull → Mon', chipClass:'chip-nt', wr:'2k:78% 4k:100%', triggered:true });
   }
+  // General NT Bull (other days)
   if (isNTBull(prevO) && !(dow===5) && !(dow===1)) {
     setups.push({ label:'⚡ NT Bull', chipClass:'chip-nt', wr:'2k:83% 4k:94%', triggered:true });
   }
+  // NT Bear — not a confirmed 100% rule
   if (isNTBear(prevO)) {
     setups.push({ label:'⚡ NT Bear', chipClass:'chip-ntbr', wr:'2k:83% 4k:90%', triggered:true });
   }
