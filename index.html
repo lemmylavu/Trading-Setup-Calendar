@@ -254,74 +254,66 @@ body {
 
 /* ── MOBILE ── */
 @media (max-width: 600px) {
+  /* Top bar: 2 rows - brand+save on top, nav on bottom */
   .topbar {
-    padding: 0.7rem 1rem; gap: 0.5rem; flex-wrap: wrap;
+    padding: 0.6rem 0.75rem;
+    gap: 0.4rem;
+    flex-wrap: wrap;
   }
-  .brand { font-size: 0.9rem; }
-  #saveIndicator { font-size: 0.6rem; }
-  .nav-month { gap: 0.4rem; }
-  .month-label { font-size: 0.8rem; min-width: 130px; }
-  .nav-btn { width: 28px; height: 28px; font-size: 0.9rem; }
-  .today-btn { font-size: 0.6rem; padding: 0.3rem 0.5rem; }
+  .brand { font-size: 0.9rem; flex-shrink: 0; }
+  #saveIndicator { font-size: 0.55rem; margin-left: auto; }
 
-  .legend-bar {
-    padding: 0.5rem 0.75rem; gap: 0.35rem;
+  /* Nav row takes full width on mobile */
+  .nav-month {
+    width: 100%; justify-content: center; gap: 0.4rem;
   }
-  .lg { font-size: 0.6rem; }
+  .month-label { font-size: 0.85rem; min-width: 130px; text-align: center; }
+  .nav-btn { width: 32px; height: 32px; font-size: 1rem; flex-shrink: 0; }
+  .today-btn { font-size: 0.62rem; padding: 0.3rem 0.6rem; flex-shrink: 0; }
+
+  /* Legend: compact */
+  .legend-bar { padding: 0.4rem 0.75rem; gap: 0.3rem; }
+  .lg { font-size: 0.6rem; gap: 0.25rem; }
   .lg-dot { width: 6px; height: 6px; }
   .lg-sep { display: none; }
-  .legend-bar .note { display: none; }
+  .legend-bar .note { width: 100%; margin-left: 0; text-align: center; font-size: 0.58rem; }
 
-  .cal-wrap { padding: 0.6rem 0.5rem 1rem; }
-
+  /* Calendar */
+  .cal-wrap { padding: 0.5rem 0.35rem 1rem; }
   .cal-headers { gap: 2px; margin-bottom: 2px; }
-  .cal-header-cell {
-    font-size: 0.55rem; padding: 0.3rem 0;
-    letter-spacing: 0.5px;
-  }
-
+  .cal-header-cell { font-size: 0.55rem; padding: 0.25rem 0; letter-spacing: 0; }
   .cal-grid { gap: 2px; }
 
-  .day-cell {
-    min-height: 80px;
-    padding: 5px 4px;
-    border-radius: 6px;
-  }
-
-  .dn {
-    font-size: 0.65rem;
-    margin-bottom: 3px;
-  }
+  /* Cells — taller so chips are readable */
+  .day-cell { min-height: 90px; padding: 5px 4px; border-radius: 6px; }
+  .dn { font-size: 0.62rem; margin-bottom: 3px; }
   .today-pip { width: 5px; height: 5px; }
 
+  /* Outcome badge */
   .outcome-badge {
-    font-size: 0.5rem;
-    padding: 2px 4px;
-    margin-bottom: 3px;
-    letter-spacing: 0;
+    font-size: 0.5rem; padding: 2px 4px;
+    margin-bottom: 3px; letter-spacing: 0; border-radius: 3px;
   }
 
+  /* Setup chips — wrap text, no truncation */
   .setups { gap: 2px; }
   .setup-chip {
-    font-size: 0.48rem;
-    padding: 2px 4px;
-    line-height: 1.25;
-    border-left-width: 2px;
+    font-size: 0.5rem; padding: 2px 4px;
+    line-height: 1.3; border-left-width: 2px;
+    white-space: normal; word-break: break-word;
   }
   .setup-chip .chip-wr { display: none; }
 
-  /* Picker full-width on mobile */
+  /* Picker — bottom sheet on mobile */
+  .picker-overlay { align-items: flex-end; }
   .picker-box {
-    width: calc(100vw - 2rem);
-    padding: 1.25rem;
-    margin: 1rem;
+    width: 100%; border-radius: 16px 16px 0 0;
+    padding: 1.25rem 1rem 2rem; margin: 0;
   }
-  .picker-title { font-size: 0.72rem; }
-  .picker-opt {
-    font-size: 0.68rem;
-    padding: 0.55rem 0.4rem;
-  }
+  .picker-title { font-size: 0.75rem; margin-bottom: 0.75rem; }
   .picker-grid { gap: 0.4rem; }
+  .picker-opt { font-size: 0.72rem; padding: 0.65rem 0.3rem; }
+  .picker-clear, .picker-cancel { font-size: 0.72rem; padding: 0.6rem; }
 }
 </style>
 </head>
@@ -537,71 +529,65 @@ function getSetups(y, m, d) {
 
   // ── NEW SETUP ────────────────────────────────────────────────────────
   if (dow === 1 && wom === 1) {
-    setups.push({ label:'Mon — Week 1 of month', chipClass:'chip-new', wr:'100%', triggered:false });
+    setups.push({ label:'Mon Wk1', chipClass:'chip-new', wr:'100%', triggered:false });
   }
 
   // ── SEASONAL ─────────────────────────────────────────────────────────
   if (m===12 && dow===2 && wom!==4)
-    setups.push({ label:'Dec Tuesday (not Wk4)', chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+    setups.push({ label:'Dec Tue', chipClass:'chip-sea', wr:'100%', triggered:false });
   if (m===3  && dow===2)
-    setups.push({ label:'March Tuesday',          chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+    setups.push({ label:'Mar Tue', chipClass:'chip-sea', wr:'100%', triggered:false });
   if (m===3  && dow===5)
-    setups.push({ label:'March Friday',           chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+    setups.push({ label:'Mar Fri', chipClass:'chip-sea', wr:'100%', triggered:false });
   if (m===4  && dow===1)
-    setups.push({ label:'April Monday',           chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+    setups.push({ label:'Apr Mon', chipClass:'chip-sea', wr:'100%', triggered:false });
   if (m===7  && dow===5)
-    setups.push({ label:'July Friday',            chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+    setups.push({ label:'Jul Fri', chipClass:'chip-sea', wr:'100%', triggered:false });
   if (m===9  && dow===4)
-    setups.push({ label:'September Thursday',     chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+    setups.push({ label:'Sep Thu', chipClass:'chip-sea', wr:'100%', triggered:false });
   if (m===10 && dow===2)
-    setups.push({ label:'October Tuesday',        chipClass:'chip-sea', wr:'100% 4kSL', triggered:false });
+    setups.push({ label:'Oct Tue', chipClass:'chip-sea', wr:'100%', triggered:false });
 
   // ── NO TRADE BASED (triggered by previous day) ───────────────────────
-  // Rule NT1: Thu was NO TRADE + Bullish → trade Fri
   if (dow === 5 && isNTBull(prevO)) {
-    setups.push({ label:'⚡ Thu NT Bullish → Trade today (Fri)', chipClass:'chip-nt', wr:'100%', triggered:true });
+    setups.push({ label:'⚡ Thu NT Bull → Fri', chipClass:'chip-nt', wr:'100%', triggered:true });
   }
-  // Rule NT2: Fri was NO TRADE + Bullish → Buy on Mon
   if (dow === 1 && isNTBull(prevO)) {
-    setups.push({ label:'⚡ Fri NT Bullish → BUY today (Mon)', chipClass:'chip-nt', wr:'100%', triggered:true });
+    setups.push({ label:'⚡ Fri NT Bull → Buy', chipClass:'chip-nt', wr:'100%', triggered:true });
   }
-  // General: prev day was NT Bullish
   if (isNTBull(prevO) && !(dow===5) && !(dow===1)) {
-    setups.push({ label:'⚡ Prev day NT Bullish', chipClass:'chip-nt', wr:'~94%', triggered:true });
+    setups.push({ label:'⚡ NT Bull', chipClass:'chip-nt', wr:'~94%', triggered:true });
   }
-  // General: prev day was NT Bearish
   if (isNTBear(prevO)) {
-    setups.push({ label:'⚡ Prev day NT Bearish', chipClass:'chip-ntbr', wr:'~97%', triggered:true });
+    setups.push({ label:'⚡ NT Bear', chipClass:'chip-ntbr', wr:'~97%', triggered:true });
   }
 
   // ── SL-BASED (triggered) ─────────────────────────────────────────────
-  // Rule SL1: After SL → trade if BO is opposite direction
   if (isSLBuy(prevO)) {
-    setups.push({ label:'⚡ Prev SL-Buy → Watch for SELL BO', chipClass:'chip-sl', wr:'97.48%', triggered:true });
+    setups.push({ label:'⚡ SL-Buy → Sell BO', chipClass:'chip-sl', wr:'97.48%', triggered:true });
   }
   if (isSLSell(prevO)) {
-    setups.push({ label:'⚡ Prev SL-Sell → Watch for BUY BO', chipClass:'chip-sl', wr:'97.48%', triggered:true });
+    setups.push({ label:'⚡ SL-Sell → Buy BO', chipClass:'chip-sl', wr:'97.48%', triggered:true });
   }
 
   // Rule SL2: After 2 consecutive SLs → trade
   if (isSL(prevO) && isSL(prev2O)) {
-    setups.push({ label:'⚡ 2 Consecutive SLs → Trade', chipClass:'chip-sl', wr:'100%', triggered:true });
+    setups.push({ label:'⚡ 2x SL → Trade', chipClass:'chip-sl', wr:'100%', triggered:true });
   }
 
   // Rule SL3: Mon was SL → Trade Tue & Wed
   if (dow === 2 || dow === 3) {
-    // find most recent Monday
     const monDate = new Date(y, m-1, d);
     while (monDate.getDay() !== 1) monDate.setDate(monDate.getDate() - 1);
     const monO = outcomes[oKey(monDate.getFullYear(), monDate.getMonth()+1, monDate.getDate())];
     if (isSL(monO)) {
-      setups.push({ label:'⚡ Mon was SL → Trade today', chipClass:'chip-sl', wr:'100%', triggered:true });
+      setups.push({ label:'⚡ Mon SL → Trade', chipClass:'chip-sl', wr:'100%', triggered:true });
     }
   }
 
   // Rule SL4: SL-Sell → next day BO is Buy → Trade
   if (isSLSell(prevO)) {
-    setups.push({ label:'⚡ SL-Sell prev day → BUY BO today', chipClass:'chip-sl', wr:'100%', triggered:true });
+    setups.push({ label:'⚡ SL-Sell → Buy today', chipClass:'chip-sl', wr:'100%', triggered:true });
   }
 
   return setups;
